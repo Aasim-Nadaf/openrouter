@@ -11,3 +11,51 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model User {
+  id       String   @id @default(uuid())
+  email    String   @unique
+  password String
+  apiKeys  ApiKey[]
+  credits  Int      @default(0)
+}
+
+model ApiKey {
+  id       String  @id @default(uuid())
+  userId   String
+  apikey   String  @unique
+  disabled Boolean @default(false)
+  user     User    @relation(fields: [userId], references: [id])
+}
+
+model Company {
+  id       String  @id @default(uuid())
+  name     String
+  websites String
+  models   Model[]
+}
+
+model Model {
+  id                   String                 @id @default(uuid())
+  name                 String
+  companyId            String
+  company              Company                @relation(fields: [companyId], references: [id])
+  modelProviderMapping ModelProviderMapping[]
+}
+
+model Provider {
+  id                   String                 @id @default(uuid())
+  name                 String
+  website              String
+  modelProviderMapping ModelProviderMapping[]
+}
+
+model ModelProviderMapping {
+  id              String   @id @default(uuid())
+  modelId         String
+  providerId      String
+  inputTokenCost  Int
+  outputTokenCost Int
+  model           Model    @relation(fields: [modelId], references: [id])
+  provider        Provider @relation(fields: [providerId], references: [id])
+}
